@@ -1,11 +1,11 @@
 // Data storage using localStorage
 const db = {
   getKelas: () => JSON.parse(localStorage.getItem('kelas') || '[]'),
-  setKelas: (data) => localStorage.setItem('kelas', JSON.stringify(data)),
+  setKelas: (absensi) => localStorage.setItem('kelas', JSON.stringify(data)),
   getSiswa: () => JSON.parse(localStorage.getItem('siswa') || '[]'),
-  setSiswa: (data) => localStorage.setItem('siswa', JSON.stringify(data)),
+  setSiswa: (absensi) => localStorage.setItem('siswa', JSON.stringify(data)),
   getAbsensi: () => JSON.parse(localStorage.getItem('absensi') || '[]'),
-  setAbsensi: (data) => localStorage.setItem('absensi', JSON.stringify(data)),
+  setAbsensi: (absensi) => localStorage.setItem('absensi', JSON.stringify(data)),
 };
 
 // NAVIGATION
