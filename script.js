@@ -267,11 +267,11 @@ function eksporExcelDashboard() {
   eksporExcel(today, 'absensi_hari_ini.xlsx');
 }
 
-function eksporExcel(data, filename) {
-  if (!data.length) return alert("Tidak ada data untuk diekspor!");
-  const ws = XLSX.utils.json_to_sheet(data);
+function eksporExcel(absensi, filename) {
+  if (!absensi.length) return alert("Tidak ada data untuk diekspor!");
+  const ws = XLSX.utils.json_to_sheet(absensi);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+  XLSX.utils.book_append_sheet(wb, ws, "absensi");
   XLSX.writeFile(wb, filename);
 }
 
@@ -378,7 +378,7 @@ function eksporExcelRekap() {
     XLSX.utils.book_append_sheet(wb, ws, namaKelas);
   });
 
-  XLSX.writeFile(wb, 'data.xlsx');
+  XLSX.writeFile(wb, 'absensi.xlsx');
 }
 // Shortcut dashboard
 document.getElementById('btnMulaiAbsen').addEventListener('click', () => showPage('Absensi'));
