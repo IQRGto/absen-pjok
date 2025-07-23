@@ -1,11 +1,11 @@
 // Data storage using localStorage
 const db = {
   getKelas: () => JSON.parse(localStorage.getItem('kelas') || '[]'),
-  setKelas: (absensi) => localStorage.setItem('kelas', JSON.stringify(absensi)),
+  setKelas: (data) => localStorage.setItem('kelas', JSON.stringify(data)),
   getSiswa: () => JSON.parse(localStorage.getItem('siswa') || '[]'),
-  setSiswa: (absensi) => localStorage.setItem('siswa', JSON.stringify(absensi)),
+  setSiswa: (data) => localStorage.setItem('siswa', JSON.stringify(data)),
   getAbsensi: () => JSON.parse(localStorage.getItem('absensi') || '[]'),
-  setAbsensi: (absensi) => localStorage.setItem('absensi', JSON.stringify(absensi)),
+  setAbsensi: (data) => localStorage.setItem('absensi', JSON.stringify(data)),
 };
 
 // NAVIGATION
@@ -193,8 +193,30 @@ document.getElementById('formAbsensi').addEventListener('submit', function(e) {
   let absensi = db.getAbsensi().filter(a => !(a.kelas === kelasDipilih && a.tanggal === tanggal));
   siswa.forEach(s => {
     const status = document.querySelector(`[name="status_${s.nama}"]`).value;
-    if (status) absensi.push({ kelas: kelasDipilih, nama: s.nama, tanggal, status });
+   document.getElementById('formAbsensi').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const kelasDipilih = document.getElementById('selectKelasAbsensi').value;
+  const tanggal = document.getElementById('inputTanggalAbsensi').value;
+  const siswa = db.getSiswa().filter(s => s.kelas === kelasDipilih);
+  let absensi = db.getAbsensi().filter(a => !(a.kelas === kelasDipilih && a.tanggal === tanggal));
+
+  siswa.forEach(s => {
+    const status = document.querySelector(`[name="status_${s.nama}"]`).value;
+    if (status) {
+      const dataAbsensi = { kelas: kelasDipilih, nama: s.nama, tanggal, status };
+      absensi.push(dataAbsensi);
+
+      // Kirim ke Google Sheet
+      kirimKeGoogleSheet(dataAbsensi);
+    }
   });
+
+  db.setAbsensi(absensi);
+  alert('Absensi berhasil disimpan!');
+  renderDashboard();
+  renderRekap();
+});
+
   db.setAbsensi(absensi);
   alert('Absensi berhasil disimpan!');
   renderDashboard();
@@ -259,6 +281,21 @@ function updateTabelRekap() {
   `).join('');
 }
 
+function kirimKeGoogleSheet(data) {
+  const WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_WEBAPP_ID_HERE/exec';
+  fetch(WEB_APP_URL, {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' }
+  }).then(res => res.text()).then(res => {
+    console.log('Terkirim ke Google Sheet:', res);
+  }).catch(err => {
+    console.error('Gagal kirim ke Google Sheet:', err);
+  });
+}
+
+
+
 function eksporExcelDashboard() {
   const absensi = db.getAbsensi();
   const hariIni = new Date().toISOString().slice(0, 10);
@@ -267,11 +304,11 @@ function eksporExcelDashboard() {
   eksporExcel(today, 'absensi_hari_ini.xlsx');
 }
 
-function eksporExcel(absensi, filename) {
-  if (!absensi.length) return alert("Tidak ada data untuk diekspor!");
-  const ws = XLSX.utils.json_to_sheet(absensi);
+function eksporExcel(data, filename) {
+  if (!data.length) return alert("Tidak ada data untuk diekspor!");
+  const ws = XLSX.utils.json_to_sheet(data);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "absensi");
+  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
   XLSX.writeFile(wb, filename);
 }
 
@@ -378,7 +415,7 @@ function eksporExcelRekap() {
     XLSX.utils.book_append_sheet(wb, ws, namaKelas);
   });
 
-  XLSX.writeFile(wb, 'absensi.xlsx');
+  XLSX.writeFile(wb, 'data.xlsx');
 }
 // Shortcut dashboard
 document.getElementById('btnMulaiAbsen').addEventListener('click', () => showPage('Absensi'));
